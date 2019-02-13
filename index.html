@@ -5,8 +5,176 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>카드 그림 맞추기</title>
+  <style>
+    * { 
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    .title {
+      text-align: center;
+    }
+
+    .wrap {
+      width: 800px;
+      background: lavender;
+      margin: 0 auto;
+    }
+
+    .cards {
+      font-size: 0;
+      width: 100%;
+    }
+
+    .card {
+      width: 180px;
+      height: 180px;
+      margin: 10px;
+      position: relative;
+      display: inline-block;
+      box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.5);
+      cursor: pointer;
+    }
+
+    .front {
+      position: absolute;
+      width: 180px;
+      height: 180px;
+      font-size: 40px;
+      line-height: 180px;
+      text-align: center;
+      transition: transform 0.5s;
+      transform: rotateY(0deg);
+      backface-visibility: hidden;
+    }
+
+    .front.fliped {
+      transform: rotateY(180deg);
+    }
+
+    .back {
+      position: absolute;
+      width: 180px;
+      height: 180px;
+      transition: transform 0.5s;
+      transform: rotateY(180deg);
+      backface-visibility: hidden;
+    }
+
+    .back.fliped {
+      transform: rotateY(0deg);
+    }
+  </style>
 </head>
 <body>
+  <div class="header">
+    <h1 class="title">카드 그림 맞추기</h1>
+  </div>
+
+  <div class="wrap">
+    <div class="cards">
+    </div>
+  </div>
+
+  <div class="result">
+    <div class="score">Score : 0</div>
+  </div>
+
+  <script src="./js/images.js"></script>
+  <script>
+
+    const cards = document.querySelector('.cards');
+    const score = document.querySelector('.score');
+    let randomNum;
+    let cardNum;
+    let cardRecord = [];
+    let frontCard;
+    let backCard;
+    let cardNumRecord = [];
+    let checkingCard = true;
+    let correct = 0;
+
+    function createCardList(array) {
+      const cardList = array.map((image, i) => `
+      <div class="card" data-id="card${i+1}">
+        <div class="back">
+          <img src="./images/${image}"/>
+        </div>
+        <div class="front">?</div>
+      </div>
+      `).join("");
+
+      return cardList;
+    }
+
+    function insertCardList() {
+      const list = createCardList(images);
+      cards.innerHTML = list;
+    }
+    
+    function clickCard() {
+      const card = document.querySelectorAll('.card');
+
+      card.forEach(card => card.addEventListener('click', function(e) {
+        if(checkingCard && cardRecord.length <= 2 && e.target.tagName !== "IMG")  {
+          cardNum = e.target.parentElement.dataset.id;
+          frontCard = document.querySelector(`[data-id=${cardNum}]`).querySelector('.front');
+          backCard = document.querySelector(`[data-id=${cardNum}]`).querySelector('.back');
+          frontCard.classList.add('fliped');
+          backCard.classList.add('fliped');
   
+          cardRecord.push(backCard.querySelector('img').src);
+          cardNumRecord.push(cardNum);
+  
+          // 카드 2장 오픈했을때
+          if(cardRecord.length === 2) {
+            // 카드가 같을 경우
+            if(cardRecord[0] === cardRecord[1]) {
+              correct++;
+              score.innerHTML = `Score : ${correct}`;
+              cardRecord = [];
+              cardNumRecord = [];
+  
+              if(correct == 10) {
+                setTimeout(() => {
+                  alert("결과 페이지 안내");
+                }, 400);
+                return;
+              }
+            // 카드가 같지 않을 경우
+            } else {
+              checkingCard = false;
+              // 카드 돌리기
+              setTimeout(flipBack, 600);
+            }
+          } 
+        }
+      }))
+    }
+
+    function flipBack() {
+      frontCard = document.querySelector(`[data-id=${cardNumRecord[0]}]`).querySelector('.front');  
+      backCard = document.querySelector(`[data-id=${cardNumRecord[0]}]`).querySelector('.back');
+      frontCard.classList.remove('fliped');
+      backCard.classList.remove('fliped');
+      frontCard = document.querySelector(`[data-id=${cardNumRecord[1]}]`).querySelector('.front');
+      backCard = document.querySelector(`[data-id=${cardNumRecord[1]}]`).querySelector('.back');
+      frontCard.classList.remove('fliped');
+      backCard.classList.remove('fliped');
+
+      cardRecord = [];
+      cardNumRecord = [];
+      checkingCard = true;
+    }
+
+    function init() {
+      insertCardList();
+      clickCard();
+    }
+
+    init();
+
+  </script>
 </body>
 </html>
