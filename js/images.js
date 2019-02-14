@@ -15,8 +15,4 @@ const images = [
   "card7.jpg",
   "card8.jpg",
   "card8.jpg",
-  "card9.jpg",
-  "card9.jpg",
-  "card10.jpg",
-  "card10.jpg",
 ];
